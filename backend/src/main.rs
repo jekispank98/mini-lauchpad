@@ -300,15 +300,50 @@ fn parse_token_created(logs: &RpcLogsResponse, _program_id: Pubkey) -> Option<To
 }
 
 fn to_fixed_6(txt: &str) -> Result<u64> {
-    // TODO(student): parse a decimal string into an integer with 6 fixed decimals.
-    // Examples:
-    // - "120" -> 120_000_000
-    // - "120.12" -> 120_120_000
-    // - "0.000001" -> 1
-    // Extra digits after the 6th decimal place should be truncated, not rounded.
-    let _ = txt;
-    todo!("student task: implement fixed-6 parser")
+    const SCALE: u64 = 1_000_000;
+
+    let s = txt.trim();
+    if s.is_empty() {
+        return Err(anyhow!("empty price string"));
+    }
+
+    let mut parts = s.split('.');
+    let whole_part = parts.next().unwrap();
+    let frac_part = parts.next();
+
+    if parts.next().is_some() {
+        return Err(anyhow!("invalid decimal format"));
+    }
+
+    if whole_part.is_empty() || !whole_part.chars().all(|c| c.is_ascii_digit()) {
+        return Err(anyhow!("invalid integer part"));
+    }
+
+    let whole = whole_part.parse::<u64>().context("parse integer part")?;
+
+    let frac = match frac_part {
+        None => 0,
+        Some(frac_str) => {
+            if !frac_str.chars().all(|c| c.is_ascii_digit()) {
+                return Err(anyhow!("invalid fractional part"));
+            }
+
+            let truncated: String = frac_str.chars().take(6).collect();
+            let padded = format!("{:0<6}", truncated);
+
+            padded.parse::<u64>().context("parse fractional part")?
+        }
+    };
+
+    let scaled_whole = whole
+        .checked_mul(SCALE)
+        .ok_or_else(|| anyhow!("overflow while scaling integer part"))?;
+
+    scaled_whole
+        .checked_add(frac)
+        .ok_or_else(|| anyhow!("overflow while combining parts"))
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -338,9 +373,7 @@ mod tests {
 
     #[test]
     fn to_fixed_6_truncates_fraction_to_six_digits() {
-        // TODO(student): this assertion is intentionally wrong.
-        // The parser is expected to truncate after 6 digits instead of rounding.
-        assert_eq!(to_fixed_6("1.1234569").unwrap(), 1_123_457);
+        assert_eq!(to_fixed_6("1.1234569").unwrap(), 1_123_456);
     }
 
     #[test]
