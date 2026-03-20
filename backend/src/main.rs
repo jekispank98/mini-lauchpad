@@ -21,7 +21,7 @@ use solana_sdk::{
 use tokio::time::interval;
 use tracing::{error, info, warn};
 
-const DEFAULT_PRICE_POLL_INTERVAL_SEC: u64 = 600; // 10 minutes; live price from Binance when MOCK_PRICE is not set
+const DEFAULT_PRICE_POLL_INTERVAL_SEC: u64 = 999999999; // 10 minutes; live price from Binance when MOCK_PRICE is not set
 
 #[derive(Clone)]
 struct Config {
@@ -267,17 +267,16 @@ async fn run_event_listener(cfg: Config) -> Result<()> {
 
 fn parse_token_created(logs: &RpcLogsResponse, _program_id: Pubkey) -> Option<TokenCreatedLog> {
     let re = Regex::new(
-        r"TokenCreated \{ creator: ([A-Za-z0-9]+), mint: ([A-Za-z0-9]+), decimals: (\d+), initial_supply: (\d+), fee_lamports: (\d+), sol_usd_price: (\d+), slot: (\d+) \}",
-    )
-    .expect("regex");
+        r"TokenCreated \{ creator: ([^,]+), mint: ([^,]+), decimals: (\d+), initial_supply: (\d+), fee_lamports: (\d+), sol_usd_price: (\d+), slot: (\d+) \}",
+    ).expect("regex");
 
     for log in &logs.logs {
         if !log.contains("TokenCreated") {
             continue;
         }
         if let Some(caps) = re.captures(log) {
-            let creator = caps.get(1)?.as_str().to_string();
-            let mint = caps.get(2)?.as_str().to_string();
+            let creator = caps.get(1)?.as_str().trim().to_string();
+            let mint = caps.get(2)?.as_str().trim().to_string();
             let decimals = caps.get(3)?.as_str().parse().ok()?;
             let initial_supply = caps.get(4)?.as_str().parse().ok()?;
             let fee_lamports = caps.get(5)?.as_str().parse().ok()?;
