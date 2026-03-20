@@ -97,3 +97,23 @@
 3. `cd program && node scripts/init-local.js` — скопировать `ORACLE_STATE_PUBKEY` в `backend/.env`
 4. `cd backend && cargo run`
 5. `cd frontend && npm run dev` — открыть в браузере и покликать.
+
+
+## Devnet Deployment (Готово)
+
+Проект успешно развернут в сети Devnet.
+
+### Адреса контрактов (Program Addresses)
+
+| Программа | Адрес (Program ID) |
+| :--- | :--- |
+| **Оракул (Oracle)** | `3aNQUEVW8nc7NUDNFu8MafWRfcKKF7Xns4N9nVLimtGW` |
+| **Лончпад (Minter)** | `EVHqE8JojZ6wCh1raFEPetYTBYN6hUadioiF11KJytRR` |
+| **PDA Состояния Оракула** | `HX98DGHMnegVykeJgXsmQFLogUtKohvFCpRU8ngfEmku` |
+
+### Успешные транзакции создания токенов (Token Creation)
+
+Ниже приведены ссылки на транзакции минта токенов через фронтенд в сети Devnet:
+
+1.  [Транзакция #1](https://solscan.io/tx/3WzQ4ibLN8owXF5io1wFwiCaKtGKsMJNinN1C5FVGszYcqP5GErzeM2jxrFD1a1oAKbzvzxxgtYzgdvJH7g8Ph8B?cluster=devnet)
+2.  [Транзакция #2](https://solscan.io/tx/3W74Xf7bcar7yVTM6XoXWHrimugKdUJnf7VeiykZWZuGWXfW7VoYnnHnmHGhe9Hcuv2MgqnujrEQBqTsAMW5kYqz?cluster=devnet)
